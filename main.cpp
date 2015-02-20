@@ -1,6 +1,11 @@
 #include "common.h"
 #include "cpu.h"
 #include "gpu.h"
+#include "lpc.h"
+#include "os.h"
+#include "d3d.h"
+
+#include "visitor.h"
 
 using namespace std;
 
