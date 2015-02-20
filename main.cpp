@@ -31,13 +31,14 @@ int main(int argc, char **argv){
 	cout << ss.str() << endl;
 	//cout << "b" << endl;
 
-	for (int i = 0; i < 1000; i++){
-		Sleep(1000);
+	for (int i = 0; i < 100; i++){
+		Sleep(100);
 		mCPU->onUpdate(rCPU);
 		mGPU->onUpdate(rGPU);
 		ss.str(std::string());
 		//ss << rCPU->csv() << "," << rGPU->csv();
-		ss << (*rCPU) << "," << (*rGPU);
+		//ss << (*rCPU) << "," << (*rGPU);
+		ss << rCPU << "," << rGPU;
 		cout << ss.str() << endl;
 	}	
 
@@ -46,6 +47,8 @@ int main(int argc, char **argv){
 
 	delete mCPU;
 	delete mGPU;
+
+	_CrtSetReportMode(_CRT_ERROR, _CRTDBG_MODE_DEBUG);
 
 	return 0;
 }

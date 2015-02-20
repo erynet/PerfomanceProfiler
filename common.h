@@ -20,6 +20,10 @@
 
 #include <Windows.h>
 
+#define _CRTDBG_MAP_ALLOC
+#include <stdlib.h>
+#include <crtdbg.h>
+
 using namespace std;
 
 typedef int int32;
@@ -57,11 +61,11 @@ interface IInfo{
 interface IReport{
 	virtual string header() = 0;
 	virtual string csv() = 0;
-	//virtual friend ostream& operator<<(ostream& out, const IReport& i) = 0;
+	//virtual friend ostream& operator<<(ostream& out, IReport& p) {};
+	//virtual friend ostream& operator<<(ostream& out, IReport* p) {};
 };
 
 interface ISensor{
-	//virtual void setConfig(void* p) = 0;
 	virtual int initialize() = 0;
 	virtual void getInfo(IInfo* p) = 0;
 	virtual void printInfo() = 0;

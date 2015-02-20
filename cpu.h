@@ -42,12 +42,33 @@ public:
 	string header();
 	string csv();
 	friend ostream& operator<<(ostream& out, CPUReport& p);
+	friend ostream& operator<<(ostream& out, CPUReport* p);
+
+	//friend ostream& operator<<(ostream& out, IReport& p);
+	//friend ostream& operator<<(ostream& out, IReport* p);
 };
 
-ostream& operator<<(ostream& os, CPUReport& p){
-	os << p.csv();
-	return os;
+ostream& operator<<(ostream& out, CPUReport& p){
+	out << p.csv();
+	return out;
 }
+
+ostream& operator<<(ostream& out, CPUReport* p){
+	out << p->csv();
+	return out;
+}
+
+//ostream& operator<<(ostream& out, IReport& p){
+//	CPUReport *i = static_cast<CPUReport*>(&p);
+//	out << i->csv();
+//	return out;
+//}
+
+//ostream& operator<<(ostream& out, IReport* p){
+//	CPUReport *i = static_cast<CPUReport*>(p);
+//	out << i->csv();
+//	return out;
+//}
 
 
 void CPUReport::update(){

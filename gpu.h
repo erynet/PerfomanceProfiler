@@ -64,11 +64,17 @@ public:
 	string csv();
 
 	friend ostream& operator<<(ostream& out, GPUReport& p);
+	friend ostream& operator<<(ostream& out, GPUReport* p);
 };
 
-ostream& operator<<(ostream& os, GPUReport& p){
-	os << p.csv();
-	return os;
+ostream& operator<<(ostream& out, GPUReport& p){
+	out << p.csv();
+	return out;
+}
+
+ostream& operator<<(ostream& out, GPUReport* p){
+	out << p->csv();
+	return out;
 }
 
 void GPUReport::update(){
