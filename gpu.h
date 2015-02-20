@@ -38,15 +38,17 @@ public:
 };
 
 class GPUReport : public IReport{
+private:
+	vector<Token*> t;
+	void update();
 public:
 	unsigned int usage;
-
-	unsigned int fanRPM;
 
 	unsigned int currentThermalGpu;
 	unsigned int currentThermalMemory;
 	unsigned int currentThermalPowerSupply;
 
+	unsigned int fanRPM;
 
 	unsigned int currentFreqGraphics;
 	unsigned int currentFreqMemory;
@@ -54,10 +56,69 @@ public:
 
 	string reasonPerfDecrease;
 
-	string header() { return string(); };
-	string csv() { return string(); };
+	GPUReport();
 
+	void reset() {};
+
+	string header();
+	string csv();
+
+	friend ostream& operator<<(ostream& out, GPUReport& p);
 };
+
+ostream& operator<<(ostream& os, GPUReport& p){
+	os << p.csv();
+	return os;
+}
+
+void GPUReport::update(){
+	t.clear();
+	t.push_back(new Token("Usage_GPU", "% 9d", 10));
+	t.push_back(new Token("Temp_GPU", "% 8d", 9));
+	t.push_back(new Token("RPM_GPU_Fan", "% 11d", 12));
+	t.push_back(new Token("Reason_Perf_Decrease_GPU", "% 24s", 25));
+
+	t[0]->set(usage);
+	t[1]->set(currentThermalGpu);
+	t[2]->set(fanRPM);
+	t[3]->set(reasonPerfDecrease);
+
+//	for (int i = 0; i < t.size(); i++)
+//		cout << t[i]->type << " ";
+//	cout << endl;
+}
+
+GPUReport::GPUReport(){
+//	t.push_back(new Token("Usage_GPU", "% 9d", 10));
+//	t.push_back(new Token("Temp_GPU", "% 8d", 9));
+//	t.push_back(new Token("RPM_GPU_Fan", "% 11d", 12));
+//	t.push_back(new Token("Reason_Perf_Decrease", "% 20d", 21));
+}
+
+string GPUReport::header(){
+	stringstream ss;
+	this->update();
+
+	for (int i = 0; i < t.size(); i++){
+		ss << t[i]->h();
+		if ((i + 1) != t.size())
+			ss << ",";
+	}
+	return ss.str();
+}
+
+string GPUReport::csv(){
+	stringstream ss;
+	this->update();
+
+	for (int i = 0; i < t.size(); i++){
+		ss << t[i]->e();
+		if ((i + 1) != t.size())
+			ss << ",";
+	}
+	return ss.str();
+}
+
 
 typedef int *(*NvAPI_QueryInterface_t)(unsigned int offset);
 typedef NvAPI_Status(*NvAPI_Initialize_t)();
@@ -150,67 +211,67 @@ int GPU::initialize(){
 
 	// some useful internal functions that aren't exported by nvapi.dll
 	NvAPI_Initialize = (NvAPI_Initialize_t)(*NvAPI_QueryInterface)(0x0150E828);
-#ifdef _DEBUG
+#ifdef __DEBUG
 	if (NvAPI_Initialize == NULL)
 		cerr << "GPU::initialize() / " << "NvAPI_Initialize == NULL;" << endl;
 #endif
 	NvAPI_EnumPhysicalGPUs = (NvAPI_EnumPhysicalGPUs_t)(*NvAPI_QueryInterface)(0xE5AC921F);
-#ifdef _DEBUG
+#ifdef __DEBUG
 	if (NvAPI_Initialize == NULL)
 		cerr << "GPU::initialize() / " << "NvAPI_EnumPhysicalGPUs == NULL;" << endl;
 #endif
 	NvAPI_GPU_GetUsages = (NvAPI_GPU_GetUsages_t)(*NvAPI_QueryInterface)(0x189A1FDF);
-#ifdef _DEBUG
+#ifdef __DEBUG
 	if (NvAPI_Initialize == NULL)
 		cerr << "GPU::initialize() / " << "NvAPI_GPU_GetUsages == NULL;" << endl;
 #endif
 	NvAPI_GPU_GetThermalSettings = (NvAPI_GPU_GetThermalSettings_t)(*NvAPI_QueryInterface)(0xE3640A56);
-#ifdef _DEBUG
+#ifdef __DEBUG
 	if (NvAPI_Initialize == NULL)
 		cerr << "GPU::initialize() / " << "NvAPI_GPU_GetThermalSettings == NULL;" << endl;
 #endif
 	NvAPI_GPU_GetFullName = (NvAPI_GPU_GetFullName_t)(*NvAPI_QueryInterface)(0xCEEE8E9F);
-#ifdef _DEBUG
+#ifdef __DEBUG
 	if (NvAPI_Initialize == NULL)
 		cerr << "GPU::initialize() / " << "NvAPI_GPU_GetFullName == NULL;" << endl;
 #endif
 	NvAPI_GPU_GetGpuCoreCount = (NvAPI_GPU_GetGpuCoreCount_t)(*NvAPI_QueryInterface)(0xC7026A87);
-#ifdef _DEBUG
+#ifdef __DEBUG
 	if (NvAPI_Initialize == NULL)
 		cerr << "GPU::initialize() / " << "NvAPI_GPU_GetGpuCoreCount == NULL;" << endl;
 #endif
 	NvAPI_GPU_GetSystemType = (NvAPI_GPU_GetSystemType_t)(*NvAPI_QueryInterface)(0xBAAABFCC);
-#ifdef _DEBUG
+#ifdef __DEBUG
 	if (NvAPI_Initialize == NULL)
 		cerr << "GPU::initialize() / " << "NvAPI_GPU_GetSystemType == NULL;" << endl;
 #endif
 	NvAPI_GPU_GetBusType = (NvAPI_GPU_GetBusType_t)(*NvAPI_QueryInterface)(0x1BB18724);
-#ifdef _DEBUG
+#ifdef __DEBUG
 	if (NvAPI_Initialize == NULL)
 		cerr << "GPU::initialize() / " << "NvAPI_GPU_GetBusType == NULL;" << endl;
 #endif
 	NvAPI_GPU_GetVbiosRevision = (NvAPI_GPU_GetVbiosRevision_t)(*NvAPI_QueryInterface)(0xACC3DA0A);
-#ifdef _DEBUG
+#ifdef __DEBUG
 	if (NvAPI_Initialize == NULL)
 		cerr << "GPU::initialize() / " << "NvAPI_GPU_GetVbiosRevision == NULL;" << endl;
 #endif
 	NvAPI_GPU_GetVbiosOEMRevision = (NvAPI_GPU_GetVbiosOEMRevision_t)(*NvAPI_QueryInterface)(0x2D43FB31);
-#ifdef _DEBUG
+#ifdef __DEBUG
 	if (NvAPI_Initialize == NULL)
 		cerr << "GPU::initialize() / " << "NvAPI_GPU_GetVbiosOEMRevision == NULL;" << endl;
 #endif
 	//	NvAPI_GPU_GetAllClockFrequencies =	(NvAPI_GPU_GetAllClockFrequencies_t)(*NvAPI_QueryInterface)(0x2D43FB31);
-	//#ifdef _DEBUG
+	//#ifdef __DEBUG
 	//	if (NvAPI_Initialize == NULL)
 	//		cerr << "GPU::initialize() / " << "NvAPI_GPU_GetAllClockFrequencies == NULL;" << endl;
 	//#endif
 	NvAPI_GPU_GetTachReading = (NvAPI_GPU_GetTachReading_t)(*NvAPI_QueryInterface)(0x5F608315);
-#ifdef _DEBUG
+#ifdef __DEBUG
 	if (NvAPI_Initialize == NULL)
 		cerr << "GPU::initialize() / " << "NvAPI_GPU_GetTachReading == NULL;" << endl;
 #endif
 	NvAPI_GPU_GetPerfDecreaseInfo = (NvAPI_GPU_GetPerfDecreaseInfo_t)(*NvAPI_QueryInterface)(0x7F7F4600);
-#ifdef _DEBUG
+#ifdef __DEBUG
 	if (NvAPI_Initialize == NULL)
 		cerr << "GPU::initialize() / " << "NvAPI_GPU_GetPerfDecreaseInfo == NULL;" << endl;
 #endif
@@ -225,7 +286,7 @@ int GPU::initialize(){
 	}
 	else
 	{
-#ifdef _DEBUG
+#ifdef __DEBUG
 		switch (NvStatus){
 		case NVAPI_ERROR:
 			cerr << "GPU::initialize() : " << "Generic error" << endl;
@@ -256,7 +317,7 @@ void GPU::getInfo(IInfo *p){
 
 	//NvAPI_GPU_GetFullName
 	NvStatus = (*NvAPI_GPU_GetFullName)(nvGPUHandle[0], nss);
-#ifdef _DEBUG
+#ifdef __DEBUG
 	if (NvStatus != NVAPI_OK)
 		cerr << "GPU::getInfo(IInfo *p) / " << "NvAPI_GPU_GetFullName(nvGPUHandle[0], nss) : " << NvStatus << endl;
 #endif
@@ -264,7 +325,7 @@ void GPU::getInfo(IInfo *p){
 
 	//NvAPI_GPU_GetGpuCoreCount
 	NvStatus = (*NvAPI_GPU_GetGpuCoreCount)(nvGPUHandle[0], &nu32);
-#ifdef _DEBUG
+#ifdef __DEBUG
 	if (NvStatus != NVAPI_OK)
 		cerr << "GPU::getInfo(IInfo *p) / " << "NvAPI_GPU_GetGpuCoreCount(nvGPUHandle[0], &nu32) : " << NvStatus << endl;
 #endif
@@ -272,7 +333,7 @@ void GPU::getInfo(IInfo *p){
 
 	//NvAPI_GPU_GetSystemType
 	NvStatus = (*NvAPI_GPU_GetSystemType)(nvGPUHandle[0], &nst);
-#ifdef _DEBUG
+#ifdef __DEBUG
 	if (NvStatus != NVAPI_OK)
 		cerr << "GPU::getInfo(IInfo *p) / " << "NvAPI_GPU_GetSystemType(nvGPUHandle[0], &nst) : " << NvStatus << endl;
 #endif
@@ -291,7 +352,7 @@ void GPU::getInfo(IInfo *p){
 
 	//NvAPI_GPU_GetBusType
 	NvStatus = (*NvAPI_GPU_GetBusType)(nvGPUHandle[0], &ngbt);
-#ifdef _DEBUG
+#ifdef __DEBUG
 	if (NvStatus != NVAPI_OK)
 		cerr << "GPU::getInfo(IInfo *p) / " << "NvAPI_GPU_GetBusType(nvGPUHandle[0], &ngbt) : " << NvStatus << endl;
 #endif
@@ -319,7 +380,7 @@ void GPU::getInfo(IInfo *p){
 
 	//NvAPI_GPU_GetVbiosRevision
 	NvStatus = (*NvAPI_GPU_GetVbiosRevision)(nvGPUHandle[0], &nu32);
-#ifdef _DEBUG
+#ifdef __DEBUG
 	if (NvStatus != NVAPI_OK)
 		cerr << "GPU::getInfo(IInfo *p) / " << "NvAPI_GPU_GetVbiosRevision(nvGPUHandle[0], &nu32) : " << NvStatus << endl;
 #endif
@@ -327,7 +388,7 @@ void GPU::getInfo(IInfo *p){
 
 	//NvAPI_GPU_GetVbiosOEMRevision
 	NvStatus = (*NvAPI_GPU_GetVbiosOEMRevision)(nvGPUHandle[0], &nu32);
-#ifdef _DEBUG
+#ifdef __DEBUG
 	if (NvStatus != NVAPI_OK)
 		cerr << "GPU::getInfo(IInfo *p) / " << "NvAPI_GPU_GetVbiosOEMRevision(nvGPUHandle[0], &nu32) : " << NvStatus << endl;
 #endif
@@ -348,6 +409,7 @@ void GPU::printInfo(){
 
 void GPU::onUpdate(IReport* p){
 	GPUReport* i = static_cast<GPUReport*>(p);
+	i->reset();
 
 	NvU32 nu32;
 	NvU32 gpuUsages[NVAPI_MAX_USAGES_PER_GPU] = { 0 };
@@ -358,7 +420,7 @@ void GPU::onUpdate(IReport* p){
 	// gpuUsages[0] must be this value, otherwise NvAPI_GPU_GetUsages won't work
 	gpuUsages[0] = (NVAPI_MAX_USAGES_PER_GPU * 4) | 0x10000;
 	NvStatus = (*NvAPI_GPU_GetUsages)(nvGPUHandle[0], gpuUsages);
-#ifdef _DEBUG
+#ifdef __DEBUG
 	if (NvStatus != NVAPI_OK)
 		cerr << "GPU::onUpdate(IReport* p) / " << "NvAPI_GPU_GetUsages(nvGPUHandle[0], &nu32) : " << NvStatus << endl;
 	cout << "NvAPI_GPU_GetUsages : " << gpuUsages[3] << " %" << endl;
@@ -375,7 +437,7 @@ void GPU::onUpdate(IReport* p){
 	ngts.sensor[2].controller = NVAPI_THERMAL_CONTROLLER_UNKNOWN;
 	ngts.sensor[2].target = NVAPI_THERMAL_TARGET_POWER_SUPPLY;
 	NvStatus = (*NvAPI_GPU_GetThermalSettings)(nvGPUHandle[0], NVAPI_THERMAL_TARGET_ALL, &ngts);
-#ifdef _DEBUG
+#ifdef __DEBUG
 	if (NvStatus != NVAPI_OK)
 		cerr << "GPU::onUpdate(IReport* p) / " << "NvAPI_GPU_GetThermalSettings(nvGPUHandle[0], NVAPI_THERMAL_TARGET_ALL, &ngts) : " << NvStatus << endl;
 	cout << "NvAPI_GPU_GetThermalSettings : " << "GPU(" << ngts.sensor[0].currentTemp << "), " << "Memory(" << ngts.sensor[1].currentTemp << "), " << "PowerSupply(" << ngts.sensor[2].currentTemp << ")" << endl;
@@ -386,7 +448,7 @@ void GPU::onUpdate(IReport* p){
 
 	//NvAPI_GPU_GetTachReading
 	NvStatus = (*NvAPI_GPU_GetTachReading)(nvGPUHandle[0], &nu32);
-#ifdef _DEBUG
+#ifdef __DEBUG
 	if (NvStatus != NVAPI_OK)
 		cerr << "GPU::onUpdate(IReport* p) / " << "NvAPI_GPU_GetTachReading(nvGPUHandle[0], &nu32) : " << NvStatus << endl;
 	cout << "NvAPI_GPU_GetTachReading : " << nu32 << endl;
@@ -395,7 +457,7 @@ void GPU::onUpdate(IReport* p){
 
 	//NvAPI_GPU_GetPerfDecreaseInfo
 	NvStatus = (*NvAPI_GPU_GetPerfDecreaseInfo)(nvGPUHandle[0], &nu32);
-#ifdef _DEBUG
+#ifdef __DEBUG
 	if (NvStatus != NVAPI_OK)
 		cerr << "GPU::onUpdate(IReport* p) / " << "NvAPI_GPU_GetPerfDecreaseInfo(nvGPUHandle[0], &nu32) : " << NvStatus << endl;
 #endif
@@ -423,7 +485,7 @@ void GPU::onUpdate(IReport* p){
 		i->reasonPerfDecrease = "UNKNOWN";
 		break;
 	}
-#ifdef _DEBUG
+#ifdef __DEBUG
 	cout << "NvAPI_GPU_GetPerfDecreaseInfo : " << i->reasonPerfDecrease << endl;
 #endif
 }

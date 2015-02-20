@@ -54,6 +54,12 @@
     <ClInclude Include="pcm\winpmem\winpmem.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
+    <ClInclude Include="visitor.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="d3d.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pcm\winpmem\winpmem.cpp">

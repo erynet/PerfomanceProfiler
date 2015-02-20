@@ -26,15 +26,92 @@ public:
 };
 
 class CPUReport : public IReport{
+private:
+	vector<Token*> t;
+	void update();
 public:
-	vector<int32> ThermalInfoPerCore;
-	int32 ThermalInfoOfSocket;
 	double CoreUtilization;
+	int32 ThermalInfoOfSocket;
+	vector<int32> ThermalInfoPerCore;
 	double ConsumedJoules;
+
+	CPUReport();
 	
-	string header() { return string(); };
-	string csv() { return string(); };
+	void reset();
+
+	string header();
+	string csv();
+	friend ostream& operator<<(ostream& out, CPUReport& p);
 };
+
+ostream& operator<<(ostream& os, CPUReport& p){
+	os << p.csv();
+	return os;
+}
+
+
+void CPUReport::update(){
+	t.clear();
+	t.push_back(new Token("Usage_CPU", "% 9.2lf", 10));
+	t.push_back(new Token("Temp_Socket", "% 11d", 12));
+	for (int i = 0; i < ThermalInfoPerCore.size(); i++){
+		stringstream ss;
+		ss << "Temp_Core" << i;
+		t.push_back(new Token(ss.str(), "% 10d", 11));
+	}
+	t.push_back(new Token("Watt_CPU", "% 8.2lf", 9));
+
+	t[0]->set(CoreUtilization);
+	t[1]->set(ThermalInfoOfSocket);
+	for (int i = 2; i < (ThermalInfoPerCore.size() + 2); i++){
+		t[i]->set(ThermalInfoPerCore[i - 2]);
+	}
+	t[ThermalInfoPerCore.size() + 2]->set(ConsumedJoules);
+}
+
+void CPUReport::reset(){
+	ThermalInfoPerCore.clear();
+}
+
+CPUReport::CPUReport(){
+//	t.push_back(new Token("Usage_CPU", "% 6.2lf", 10));
+//	t.push_back(new Token("Temp_Socket", "% 11d", 12));
+//	for (int i = 0; i < ThermalInfoPerCore.size(); i++){
+//		stringstream ss;
+//		string s;
+//		ss << "Temp_Core" << i;
+//		s = ss.str();
+//		t.push_back(new Token(s, "% 10d", 11));
+//	}
+//	t.push_back(new Token("Watt_CPU", "% 5.2", 9));
+}
+
+string CPUReport::header(){
+	stringstream ss;
+	this->update();
+
+	for (int i = 0; i < t.size(); i++){
+		ss << t[i]->h();
+		if ((i + 1) != t.size())
+			ss << ",";
+	}
+	return ss.str();
+}
+
+string CPUReport::csv(){
+	stringstream ss;
+	this->update();
+	
+	for (int i = 0; i < t.size(); i++){
+		ss << t[i]->e();
+		if ((i + 1) != t.size())
+			ss << ",";
+	}
+	return ss.str();
+}
+
+
+
 
 class CPU : public ISensor{
 	//MAKE_SINGLETON(CPU);
@@ -149,6 +226,7 @@ void CPU::printInfo(){
 
 void CPU::onUpdate(IReport *p){
 	CPUReport* i = static_cast<CPUReport*>(p);
+	i->reset();
 
 	m->getAllCounterStates(sstate2, sktstate2, cstates2);
 
@@ -159,7 +237,7 @@ void CPU::onUpdate(IReport *p){
 		i->ThermalInfoPerCore.push_back(thermalJunctionMax - (cstates2[j * threadsPerCore].getThermalHeadroom()));
 	m->getAllCounterStates(sstate1, sktstate1, cstates1);
 
-#ifdef _DEBUG
+#ifdef __DEBUG
 	cout << "CoreUtilization : " << i->CoreUtilization << endl;
 	cout << "ConsumedJoules : " << i->ConsumedJoules << endl;
 	cout << "ThermalInfoOfSocket : " << i->ThermalInfoOfSocket << endl;
