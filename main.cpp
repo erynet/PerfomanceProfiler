@@ -47,7 +47,6 @@ int attachProcess(string Image, HANDLE& hProcess){
 		do{
 			if (_wcsicmp(CharToWChar(Image.c_str()), pe32.szExeFile) == 0){
 				hProcess = OpenProcess(PROCESS_QUERY_INFORMATION, false, pe32.th32ProcessID);
-				cout << "CATCH" << endl;
 				break;
 			}
 		} while (Process32Next(hProcessSnap, &pe32));
@@ -58,10 +57,10 @@ int attachProcess(string Image, HANDLE& hProcess){
 
 	//}
 
-		cout << "A" << endl;
-
+		
 	if (hProcess == NULL){
-		cout << GetLastError() << endl;
+		//cout << GetLastError() << endl;
+		// code 5 : Access is Denied
 		return 0;
 	}
 	else

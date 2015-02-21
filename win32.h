@@ -5,9 +5,6 @@
 #include <Psapi.h>
 #include <TlHelp32.h>
 
-//#include "pcm/cpucounters.h"
-//#include "pcm/utils.h"
-
 
 class Win32Info : public IInfo{
 public:
@@ -16,7 +13,6 @@ public:
 
 class Win32Report : public IReport{
 private:
-	//vector<Token*> t;
 	void update();
 public:
 
@@ -81,7 +77,6 @@ void Win32Report::update(){
 	t[4]->set(readOperationCountDiff);
 	t[5]->set(writeOperationCountDiff);
 	t[6]->set(otherOperationCountDiff);
-	
 	t[7]->set(readTransferCountDiff);
 	t[8]->set(writeTransferCountDiff);
 	t[9]->set(otherTransferCountDiff);
