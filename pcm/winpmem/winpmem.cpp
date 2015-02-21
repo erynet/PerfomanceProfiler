@@ -82,7 +82,8 @@ WinPmem::WinPmem():
   fd_(INVALID_HANDLE_VALUE),
   buffer_size_(1024*1024),
   buffer_(NULL),
-  suppress_output(FALSE),
+  //suppress_output(FALSE),
+  suppress_output(TRUE),
   service_name(PMEM_SERVICE_NAME) {
   buffer_ = new char[buffer_size_];
   _tcscpy_s(last_error, TEXT(""));

@@ -25,28 +25,6 @@ public:
 	void print()  {};
 };
 
-//class CPUReport : public IReport{
-//private:
-//	vector<Token*> t;
-//	void update();
-//public:	
-//	int32 ThermalInfoOfSocket;
-//	vector<int32> ThermalInfoPerCore;
-//	double ConsumedJoules;
-//	double C0StatePercent;
-//
-//	CPUReport();
-//	
-//	void reset();
-//
-//	string header();
-//	string csv();
-//	friend ostream& operator<<(ostream& out, CPUReport& p);
-//	friend ostream& operator<<(ostream& out, CPUReport* p);
-//	//friend ostream& operator<<(ostream& out, IReport& p);
-//	//friend ostream& operator<<(ostream& out, IReport* p);
-//};
-
 class CPUReport : public IReport{
 private:
 	virtual void update();
@@ -211,7 +189,11 @@ int CPU::initialize(){
 	haveSMT = m->getSMT();
 	threadsPerCore = m->getThreadsPerCore();
 	logicalCoreCount = m->getNumCores();
-	physicalCoreCount = logicalCoreCount / threadsPerCore;
+	if (haveSMT)
+		physicalCoreCount = logicalCoreCount / 2;
+	else
+		physicalCoreCount = logicalCoreCount;
+	
 
 	nominalFrequency = m->getNominalFrequency();
 
