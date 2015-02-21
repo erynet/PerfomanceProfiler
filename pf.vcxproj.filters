@@ -21,9 +21,6 @@
     <ClInclude Include="gpu.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
-    <ClInclude Include="os.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
     <ClInclude Include="lpc.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
@@ -58,6 +55,9 @@
       <Filter>헤더 파일</Filter>
     </ClInclude>
     <ClInclude Include="d3d.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="win32.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
   </ItemGroup>

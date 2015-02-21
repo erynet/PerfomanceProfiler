@@ -22,8 +22,8 @@ public:
 
 	double cpuUsage;
 
-	unsigned long workingSetSize;
-	unsigned long pagefileUsage;
+	size_t workingSetSize;
+	size_t pagefileUsage;
 
 	unsigned __int64 readOperationCountDiff;
 	unsigned __int64 writeOperationCountDiff;
@@ -173,7 +173,7 @@ Win32::Win32(HANDLE hProcess){
 	this->ProcessImageName = temp;
 
 	//get information fo os
-	GetVersionEx(&(this->OsVersionInfo));
+	//GetVersionEx(&(this->OsVersionInfo));
 	//do some stub
 
 	//initialize delta values
@@ -227,6 +227,8 @@ int Win32::initialize(){
 	this->prevOtherTransferCount = ic.OtherTransferCount;
 
 	lastRun = GetTickCount64();
+
+	return 1;
 }
 
 void Win32::getInfo(IInfo *p){

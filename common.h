@@ -1,4 +1,5 @@
 #pragma once
+#define _CRT_SECURE_NO_WARNINGS
 #include <iostream>
 #include <iomanip>
 
@@ -98,7 +99,7 @@ private:
 	string svalue;
 	
 	char buffer[128];
-	unsigned int length;
+	size_t length;
 	
 public:
 	int type;

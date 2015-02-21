@@ -120,7 +120,7 @@
     <ClInclude Include="d3d.h" />
     <ClInclude Include="gpu.h" />
     <ClInclude Include="lpc.h" />
-    <ClInclude Include="os.h" />
+    <ClInclude Include="win32.h" />
     <ClInclude Include="pcm\client_bw.h" />
     <ClInclude Include="pcm\cpucounters.h" />
     <ClInclude Include="pcm\msr.h" />
