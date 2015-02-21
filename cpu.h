@@ -72,7 +72,13 @@ ostream& operator<<(ostream& out, CPUReport* p){
 
 
 void CPUReport::update(){
+	for (int i = 0; i < t.size(); i++){
+		if (t[i] != NULL)
+			delete t[i];
+	}
 	t.clear();
+
+
 	t.push_back(new Token("Usage_CPU", "% 9.2lf", 10));
 	t.push_back(new Token("Temp_Socket", "% 11d", 12));
 	for (int i = 0; i < ThermalInfoPerCore.size(); i++){
@@ -95,16 +101,6 @@ void CPUReport::reset(){
 }
 
 CPUReport::CPUReport(){
-//	t.push_back(new Token("Usage_CPU", "% 6.2lf", 10));
-//	t.push_back(new Token("Temp_Socket", "% 11d", 12));
-//	for (int i = 0; i < ThermalInfoPerCore.size(); i++){
-//		stringstream ss;
-//		string s;
-//		ss << "Temp_Core" << i;
-//		s = ss.str();
-//		t.push_back(new Token(s, "% 10d", 11));
-//	}
-//	t.push_back(new Token("Watt_CPU", "% 5.2", 9));
 }
 
 string CPUReport::header(){

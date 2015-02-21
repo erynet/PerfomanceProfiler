@@ -78,7 +78,12 @@ ostream& operator<<(ostream& out, GPUReport* p){
 }
 
 void GPUReport::update(){
+	for (int i = 0; i < t.size(); i++){
+		if (t[i] != NULL)
+			delete t[i];
+	}
 	t.clear();
+
 	t.push_back(new Token("Usage_GPU", "% 9d", 10));
 	t.push_back(new Token("Temp_GPU", "% 8d", 9));
 	t.push_back(new Token("RPM_GPU_Fan", "% 11d", 12));

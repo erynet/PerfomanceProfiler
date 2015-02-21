@@ -92,6 +92,8 @@ private:
 
 	int ivalue;
 	unsigned int uivalue;
+	unsigned long ulvalue;
+	unsigned __int64 ullvalue;
 	double dvalue;
 	string svalue;
 	
@@ -104,6 +106,8 @@ public:
 	Token(string header, string format, unsigned int maxLength);
 	void set(int value);
 	void set(unsigned int value);
+	void set(unsigned long value);
+	void set(unsigned __int64 value);
 	void set(double value);
 	void set(string value);
 	string h();
@@ -120,8 +124,7 @@ Token::Token(string header, string format, unsigned int maxLength){
 	this->format = format;
 	this->maxLength = maxLength;
 	this->length = header.length();
-	//*(this->buffer) = "";
-
+	
 	this->type = 0;
 }
 void Token::set(int value){
@@ -134,14 +137,24 @@ void Token::set(unsigned int value){
 	this->type = 2;
 }
 
+void Token::set(unsigned long value){
+	this->ullvalue = value;
+	this->type = 3;
+}
+
+void Token::set(unsigned __int64 value){
+	this->ullvalue = value;
+	this->type = 4;
+}
+
 void Token::set(double value){
 	this->dvalue = value;
-	this->type = 3;
+	this->type = 5;
 }
 
 void Token::set(string value){
 	this->svalue = value;
-	this->type = 4;
+	this->type = 6;
 }
 
 string Token::h(){
@@ -156,9 +169,15 @@ string Token::e(){
 		sprintf_s(this->buffer, 128, this->format.c_str(), this->uivalue);
 	}
 	else if (this->type == 3){
-		sprintf_s(this->buffer, 128, this->format.c_str(), this->dvalue);
+		sprintf_s(this->buffer, 128, this->format.c_str(), this->ulvalue);
 	}
 	else if (this->type == 4){
+		sprintf_s(this->buffer, 128, this->format.c_str(), this->ullvalue);
+	}
+	else if (this->type == 5){
+		sprintf_s(this->buffer, 128, this->format.c_str(), this->dvalue);
+	}
+	else if (this->type == 6){
 		sprintf_s(this->buffer, 128, this->format.c_str(), this->svalue.c_str());
 	}
 	else {
