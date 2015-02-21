@@ -39,7 +39,6 @@ public:
 
 class GPUReport : public IReport{
 private:
-	vector<Token*> t;
 	void update();
 public:
 	unsigned int usage;
@@ -56,7 +55,8 @@ public:
 
 	string reasonPerfDecrease;
 
-	GPUReport();
+	GPUReport() {};
+	~GPUReport();
 
 	void reset() {};
 
@@ -93,17 +93,13 @@ void GPUReport::update(){
 	t[1]->set(currentThermalGpu);
 	t[2]->set(fanRPM);
 	t[3]->set(reasonPerfDecrease);
-
-//	for (int i = 0; i < t.size(); i++)
-//		cout << t[i]->type << " ";
-//	cout << endl;
 }
 
-GPUReport::GPUReport(){
-//	t.push_back(new Token("Usage_GPU", "% 9d", 10));
-//	t.push_back(new Token("Temp_GPU", "% 8d", 9));
-//	t.push_back(new Token("RPM_GPU_Fan", "% 11d", 12));
-//	t.push_back(new Token("Reason_Perf_Decrease", "% 20d", 21));
+GPUReport::~GPUReport(){
+	for (int i = 0; i < t.size(); i++){
+		if (t[i] != NULL)
+			delete t[i];
+	}
 }
 
 string GPUReport::header(){

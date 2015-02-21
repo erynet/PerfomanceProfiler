@@ -25,18 +25,40 @@ public:
 	void print()  {};
 };
 
+//class CPUReport : public IReport{
+//private:
+//	vector<Token*> t;
+//	void update();
+//public:	
+//	int32 ThermalInfoOfSocket;
+//	vector<int32> ThermalInfoPerCore;
+//	double ConsumedJoules;
+//	double C0StatePercent;
+//
+//	CPUReport();
+//	
+//	void reset();
+//
+//	string header();
+//	string csv();
+//	friend ostream& operator<<(ostream& out, CPUReport& p);
+//	friend ostream& operator<<(ostream& out, CPUReport* p);
+//	//friend ostream& operator<<(ostream& out, IReport& p);
+//	//friend ostream& operator<<(ostream& out, IReport* p);
+//};
+
 class CPUReport : public IReport{
 private:
-	vector<Token*> t;
-	void update();
+	virtual void update();
 public:
-	double CoreUtilization;
 	int32 ThermalInfoOfSocket;
 	vector<int32> ThermalInfoPerCore;
 	double ConsumedJoules;
+	double C0StatePercent;
 
-	CPUReport();
-	
+	CPUReport() {};
+	~CPUReport();
+
 	void reset();
 
 	string header();
@@ -78,29 +100,34 @@ void CPUReport::update(){
 	}
 	t.clear();
 
-
-	t.push_back(new Token("Usage_CPU", "% 9.2lf", 10));
 	t.push_back(new Token("Temp_Socket", "% 11d", 12));
 	for (int i = 0; i < ThermalInfoPerCore.size(); i++){
 		stringstream ss;
 		ss << "Temp_Core" << i;
 		t.push_back(new Token(ss.str(), "% 10d", 11));
 	}
-	t.push_back(new Token("Watt_CPU", "% 8.2lf", 9));
+	t.push_back(new Token("Consumed_Energy_CPU_In_Joules", "% 29.2lf", 30));
+	t.push_back(new Token("C0_State_Percent_Of_CPU", "% 23.2lf", 24));
 
-	t[0]->set(CoreUtilization);
-	t[1]->set(ThermalInfoOfSocket);
-	for (int i = 2; i < (ThermalInfoPerCore.size() + 2); i++){
-		t[i]->set(ThermalInfoPerCore[i - 2]);
+	
+	t[0]->set(ThermalInfoOfSocket);
+	for (int i = 1; i < (ThermalInfoPerCore.size() + 1); i++){
+		t[i]->set(ThermalInfoPerCore[i - 1]);
 	}
-	t[ThermalInfoPerCore.size() + 2]->set(ConsumedJoules);
+	t[ThermalInfoPerCore.size() + 1]->set(ConsumedJoules);
+	t[ThermalInfoPerCore.size() + 2]->set(C0StatePercent);
+
+}
+
+CPUReport::~CPUReport(){
+	for (int i = 0; i < t.size(); i++){
+		if (t[i] != NULL)
+			delete t[i];
+	}
 }
 
 void CPUReport::reset(){
 	ThermalInfoPerCore.clear();
-}
-
-CPUReport::CPUReport(){
 }
 
 string CPUReport::header(){
@@ -126,8 +153,6 @@ string CPUReport::csv(){
 	}
 	return ss.str();
 }
-
-
 
 
 class CPU : public ISensor{
@@ -247,7 +272,7 @@ void CPU::onUpdate(IReport *p){
 
 	m->getAllCounterStates(sstate2, sktstate2, cstates2);
 
-	i->CoreUtilization = getCoreCStateResidency(0, sstate1, sstate2) * 100.;
+	i->C0StatePercent = getCoreCStateResidency(0, sstate1, sstate2) * 100.;
 	i->ConsumedJoules = getConsumedJoules(sktstate1[0], sktstate2[0]);
 	i->ThermalInfoOfSocket = thermalJunctionMax - sktstate2[0].getThermalHeadroom();
 	for (unsigned int j = 0; j < physicalCoreCount; j++)

@@ -59,12 +59,28 @@ interface IInfo{
 };
 
 
-interface IReport{
+//interface IReport{
+//	virtual string header() = 0;
+//	virtual string csv() = 0;
+//	//virtual friend ostream& operator<<(ostream& out, IReport& p) {};
+//	//virtual friend ostream& operator<<(ostream& out, IReport* p) {};
+//};
+
+class Token;
+
+class IReport{
+protected:
+	vector<Token*> t;
+private:
+	virtual void update() = 0;
+public:
+	virtual ~IReport() {};
+	virtual void reset() = 0;
+	
 	virtual string header() = 0;
 	virtual string csv() = 0;
-	//virtual friend ostream& operator<<(ostream& out, IReport& p) {};
-	//virtual friend ostream& operator<<(ostream& out, IReport* p) {};
 };
+
 
 interface ISensor{
 	virtual int initialize() = 0;

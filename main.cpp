@@ -95,7 +95,7 @@ int main(int argc, char **argv){
 	CPU *mCPU = new CPU();
 	GPU *mGPU = new GPU();
 	
-	Win32Report * rWin32 = new Win32Report();
+	Win32Report *rWin32 = new Win32Report();
 	CPUReport *rCPU = new CPUReport();
 	GPUReport *rGPU = new GPUReport();
 

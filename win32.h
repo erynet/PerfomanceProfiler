@@ -16,11 +16,12 @@ public:
 
 class Win32Report : public IReport{
 private:
-	vector<Token*> t;
+	//vector<Token*> t;
 	void update();
 public:
 
-	double cpuUsage;
+	double processCpuUsage;
+	double systemCpuUsage;
 
 	size_t workingSetSize;
 	size_t pagefileUsage;
@@ -33,6 +34,7 @@ public:
 	unsigned __int64 otherTransferCountDiff;
 
 	Win32Report() {};
+	~Win32Report();
 	void reset() {};
 	string header();
 	string csv();
@@ -58,29 +60,38 @@ void Win32Report::update(){
 	t.clear();
 
 	t.push_back(new Token("CPU_Usage_Of_Process", "% 20.2f", 21));
+	t.push_back(new Token("CPU_Usage_Of_System", "% 19.2f", 20));
 	
 	t.push_back(new Token("Workingset_Of_Process", "% 21lu", 22));
 	t.push_back(new Token("Pagefile_Usage_Of_Process", "% 25lu", 26));
 	
 	t.push_back(new Token("IO_Read_Operation_Count", "% 23I64u", 24));
 	t.push_back(new Token("IO_Write_Operation_Count", "% 24I64u", 25));
-	t.push_back(new Token("IO_Mixed_Operation_Count", "% 24I64u", 25));
+	t.push_back(new Token("IO_Other_Operation_Count", "% 24I64u", 25));
 	t.push_back(new Token("IO_Read_Operation_Bytes", "% 23I64u", 24));
 	t.push_back(new Token("IO_Write_Operation_Bytes", "% 24I64u", 25));
-	t.push_back(new Token("IO_Mixed_Operation_Bytes", "% 24I64u", 25));
+	t.push_back(new Token("IO_Other_Operation_Bytes", "% 24I64u", 25));
 
-	t[0]->set(cpuUsage);
+	t[0]->set(processCpuUsage);
+	t[1]->set(systemCpuUsage);
 	
-	t[1]->set(workingSetSize);
-	t[2]->set(pagefileUsage);
+	t[2]->set(workingSetSize);
+	t[3]->set(pagefileUsage);
 	
-	t[3]->set(readOperationCountDiff);
-	t[4]->set(writeOperationCountDiff);
-	t[5]->set(otherOperationCountDiff);
+	t[4]->set(readOperationCountDiff);
+	t[5]->set(writeOperationCountDiff);
+	t[6]->set(otherOperationCountDiff);
 	
-	t[6]->set(readTransferCountDiff);
-	t[7]->set(writeTransferCountDiff);
-	t[8]->set(otherTransferCountDiff);
+	t[7]->set(readTransferCountDiff);
+	t[8]->set(writeTransferCountDiff);
+	t[9]->set(otherTransferCountDiff);
+}
+
+Win32Report::~Win32Report(){
+	for (int i = 0; i < t.size(); i++){
+		if (t[i] != NULL)
+			delete t[i];
+	}
 }
 
 string Win32Report::header(){
@@ -112,11 +123,9 @@ private:
 	OSVERSIONINFO OsVersionInfo;
 	HANDLE hProcess;
 	string ProcessImageName;
-	//HANDLE hProcessSnap;
-	//PROCESSENTRY32 pe32;
-	//DWORD *processIdsTmp;
-
+	
 	//system total times
+	FILETIME prevSysIdle;
 	FILETIME prevSysKernel;
 	FILETIME prevSysUser;
 	//process times
@@ -214,8 +223,10 @@ int Win32::initialize(){
 		return 0;
 	}
 
+	this->prevSysIdle = ftSysIdle;
 	this->prevSysKernel = ftSysKernel;
 	this->prevSysUser = ftSysUser;
+	//this->prevSysTotal = ftSysKernel + ftSysUser;
 	this->prevProcKernel = ftProcKernel;
 	this->prevProcUser = ftProcUser;
 
@@ -254,6 +265,9 @@ void Win32::onUpdate(IReport *p){
 
 	ULONGLONG ftSysKernelDiff = SubtractTimes(ftSysKernel, this->prevSysKernel);
 	ULONGLONG ftSysUserDiff = SubtractTimes(ftSysUser, this->prevSysUser);
+	ULONGLONG ftSysIdleDiff = SubtractTimes(ftSysIdle, this->prevSysIdle);
+	long long kernelTotal = (long long)(ftSysKernelDiff - ftSysIdleDiff);
+
 	ULONGLONG ftProcKernelDiff = SubtractTimes(ftProcKernel, this->prevProcKernel);
 	ULONGLONG ftProcUserDiff = SubtractTimes(ftProcUser, this->prevProcUser);
 	ULONGLONG nTotalSys = ftSysKernelDiff + ftSysUserDiff;
@@ -262,16 +276,21 @@ void Win32::onUpdate(IReport *p){
 	//이밑을 i 로 치환
 	if (nTotalSys > 0){
 		//this->cpuUsage = (float)((100.0 * nTotalProc) / nTotalSys);
-		i->cpuUsage = (float)((100.0 * nTotalProc) / nTotalSys);
-		
+		i->processCpuUsage = (double)((nTotalProc * 100.0) / nTotalSys);
+		i->systemCpuUsage = (double)(((kernelTotal + ftSysUserDiff) * 100.) / nTotalSys);
 	}
 	else {
 		//this->cpuUsage = 0.;
-		i->cpuUsage = 0;
+		i->processCpuUsage = 0.;
+		i->systemCpuUsage = 0.;
 	}
 
+	this->prevSysIdle = ftSysIdle;
 	this->prevSysKernel = ftSysKernel;
 	this->prevSysUser = ftSysUser;
+	//this->prevSysTotal = ftSysKernel + ftSysUser;
+
+
 	this->prevProcKernel = ftProcKernel;
 	this->prevProcUser = ftProcUser;
 
