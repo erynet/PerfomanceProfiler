@@ -13,27 +13,63 @@ using namespace std;
 
 ConsoleUtil cu;
 bool isFirstShow;
+bool stopTheWorld;
 
 string TimeStamp(){
 	char c[128];
 	SYSTEMTIME st;
 
 	GetSystemTime(&st);
-	sprintf_s(c, 128, "  %4d/%02d/%02d %02d:%02d:%02d.%03d", st.wYear, st.wMonth, st.wDay, st.wHour, st.wMinute, st.wSecond, st.wMilliseconds);
+	sprintf_s(c, 128, "%4d/%02d/%02d %02d:%02d:%02d.%03d", st.wYear, st.wMonth, st.wDay, st.wHour, st.wMinute, st.wSecond, st.wMilliseconds);
 
 	return string(c);
+}
+
+BOOL CtrlHandler(DWORD fdwCtrlType){
+	switch (fdwCtrlType){
+	case CTRL_C_EVENT:
+		Beep(750, 300);
+		stopTheWorld = true;
+		return true;
+//	case CTRL_CLOSE_EVENT:
+//		Beep(600, 200);
+//		printf("Ctrl-Close event\n\n");
+//		return true;
+//
+//	case CTRL_BREAK_EVENT:
+//		Beep(900, 200);
+//		printf("Ctrl-Break event\n\n");
+//		return false;
+//
+//	case CTRL_LOGOFF_EVENT:
+//		Beep(1000, 200);
+//		printf("Ctrl-Logoff event\n\n");
+//		return false;
+//
+//	case CTRL_SHUTDOWN_EVENT:
+//		Beep(750, 500);
+//		printf("Ctrl-Shutdown event\n\n");
+//		return false;
+	default:
+		return false;
+	}
 }
 
 void Show(CPUReport *rCPU, GPUReport *rGPU, Win32Report *rWin32){
 	char temp[16];
 	if (isFirstShow){
 		isFirstShow = false;
+		cu.Go(1, 0);
+		cu.CC(1);
+		cu << "Press Ctrl-C to stop";
+		cu.CC(0);
+
 		cu.Go(1, 2);
 		cu << "CPU :      ¡ÆC,        %(        %),        J";
 		cu.Go(1, 3);
 		cu << "GPU :      ¡ÆC,        %,        %,        %,      Mhz,      Mhz,      Mhz";
 	}
-	cu.Go(0, 1);
+	cu.Go(1, 1);
 	cu << TimeStamp();
 	cu.CC(1);
 	sprintf_s(temp, 16, "% 3d", rCPU->ThermalInfoOfSocket);
@@ -68,10 +104,10 @@ void Show(CPUReport *rCPU, GPUReport *rGPU, Win32Report *rWin32){
 	cu.Go(47, 3);
 	cu << temp;
 	sprintf_s(temp, 16, "% 4d", rGPU->currentFreqMemory / 1000);
-	cu.Go(57, 3);
+	cu.Go(56, 3);
 	cu << temp;
 	sprintf_s(temp, 16, "% 4d", rGPU->currentFreqShader / 1000);
-	cu.Go(67, 3);
+	cu.Go(66, 3);
 	cu << temp;
 
 	cu.Go(1, 4);
@@ -159,6 +195,7 @@ int main(int argc, char **argv){
 	HANDLE hProcess = NULL;
 	
 	bool doLogging = false;
+	stopTheWorld = false;
 	ofstream log;
 
 	stringstream ss;
@@ -170,6 +207,10 @@ int main(int argc, char **argv){
 	streambuf *errbuf = std::cerr.rdbuf(error.rdbuf());
 	wstreambuf *werrbuf = std::wcerr.rdbuf(werror.rdbuf());
 	
+	if (!SetConsoleCtrlHandler((PHANDLER_ROUTINE)CtrlHandler, TRUE)){
+		//do nothing ... 
+	}
+
 	cu.Reset();
 	
 	if (argc == 1){
@@ -216,6 +257,12 @@ int main(int argc, char **argv){
 	isFirstShow = true;
 
 	for (int i = 0; i < 10000; i++){
+		if (stopTheWorld){
+			if (doLogging)
+				clog.flush();
+			break;
+		}
+
 		Sleep(500);
 		mWin32->onUpdate(rWin32);
 		mCPU->onUpdate(rCPU);
@@ -223,10 +270,10 @@ int main(int argc, char **argv){
 		Show(rCPU, rGPU, rWin32);
 		if (doLogging) {
 			ss.str(std::string());
-			ss << TimeStamp() << "," << rCPU << "," << rGPU << "," << rWin32;
-			clog << ss.str() << endl;
+			ss << "  " << TimeStamp() << "," << rCPU << "," << rGPU << "," << rWin32 << "\n";
+			clog << ss.str();
 		}
-	}	
+	}
 
 	delete rWin32;
 	delete rCPU;
